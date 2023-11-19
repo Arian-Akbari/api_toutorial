@@ -42,7 +42,7 @@ def get_posts(db: Session = Depends(get_db)):
     return {posts}
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO post(title, content, published) VALUES (%s, %s, %s) RETURNING *""",
     #                (post.title, post.content, post.published))
@@ -54,20 +54,10 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_post)
 
-    return {
-        new_post
-    }
+    return new_post
 
 
-@app.get("/sqlalch")
-def test_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return {
-        posts
-    }
-
-
-@app.get("/posts/{ide}")
+@app.get("/posts/{ide}",response_model=schemas.Post)
 def get_posts(ide: int, db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * from post WHERE id = %s""", (str(ide),))
     # post = cursor.fetchone()
@@ -95,7 +85,7 @@ def delete_post(ide: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@app.put("/posts/{ide}")
+@app.put("/posts/{ide}", response_model=schemas.Post)
 def update_post(ide: int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE post SET title = %s , content = %s, published = %s WHERE id = %s RETURNING *""",
     #                (post.title, post.content, post.published, str(ide)))

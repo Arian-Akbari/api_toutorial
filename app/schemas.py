@@ -14,3 +14,7 @@ class PostCreate(PostBase):
 class PostUpdate(PostBase):
     pass
 
+
+class Post(PostBase):
+    class Config:
+        orm_mode = True

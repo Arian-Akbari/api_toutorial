@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
 from fastapi.params import Body
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from pydantic import BaseModel
@@ -34,12 +34,12 @@ while True:
         time.sleep(2)
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM post""")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {posts}
+    return posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
@@ -57,7 +57,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     return new_post
 
 
-@app.get("/posts/{ide}",response_model=schemas.Post)
+@app.get("/posts/{ide}", response_model=schemas.Post)
 def get_posts(ide: int, db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * from post WHERE id = %s""", (str(ide),))
     # post = cursor.fetchone()
@@ -66,9 +66,7 @@ def get_posts(ide: int, db: Session = Depends(get_db)):
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND
                             , detail=f"post with id : {ide} was not found")
-    return {
-        post
-    }
+    return post
 
 
 @app.delete("/posts/{ide}", status_code=status.HTTP_204_NO_CONTENT)
@@ -101,6 +99,14 @@ def update_post(ide: int, updated_post: schemas.PostUpdate, db: Session = Depend
     post_query.update(updated_post.model_dump(), synchronize_session=False)
     db.commit()
 
-    return {
-        post_query.first()
-    }
+    return post_query.first()
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    new_user = models.User(**user.model_dump())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user

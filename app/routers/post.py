@@ -4,10 +4,12 @@ from ..database import engine, SessionLocal, get_db
 from typing import Union, Optional, List
 from sqlalchemy.orm import Session
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/posts"
+)
 
 
-@router.get("/posts", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM post""")
     # posts = cursor.fetchall()
@@ -15,7 +17,7 @@ def get_posts(db: Session = Depends(get_db)):
     return posts
 
 
-@router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO post(title, content, published) VALUES (%s, %s, %s) RETURNING *""",
     #                (post.title, post.content, post.published))
@@ -30,7 +32,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     return new_post
 
 
-@router.get("/posts/{ide}", response_model=schemas.Post)
+@router.get("/{ide}", response_model=schemas.Post)
 def get_posts(ide: int, db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * from post WHERE id = %s""", (str(ide),))
     # post = cursor.fetchone()
@@ -42,7 +44,7 @@ def get_posts(ide: int, db: Session = Depends(get_db)):
     return post
 
 
-@router.delete("/posts/{ide}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{ide}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(ide: int, db: Session = Depends(get_db)):
     # cursor.execute("""DELETE FROM post WHERE id = %s returning *""", (str(ide),))
     # deleted_post = cursor.fetchone()
@@ -56,7 +58,7 @@ def delete_post(ide: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.put("/posts/{ide}", response_model=schemas.Post)
+@router.put("/{ide}", response_model=schemas.Post)
 def update_post(ide: int, updated_post: schemas.PostUpdate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE post SET title = %s , content = %s, published = %s WHERE id = %s RETURNING *""",
     #                (post.title, post.content, post.published, str(ide)))
